@@ -21,6 +21,28 @@ Simple "Simple Server" [package="simple"]:
             # status is intentionally lower case, do not change
             return error <: status
 
+    # /no-return-type:
+    #     GET:
+    #         return
+
+    /just-return-ok:
+        GET:
+            return ok
+
+    /just-return-error:
+        GET:
+            return error
+
+    /just-ok-and-just-error:
+        GET:
+            return error
+            return ok
+
+    /ok-type-and-just-error:
+        GET:
+            return ok <: Response
+            return error
+
     !type Stuff:
         @description =:
             | just some stuff
@@ -29,6 +51,9 @@ Simple "Simple Server" [package="simple"]:
         sensitiveStuff <: string:
             @json_tag = "sensitiveStuff"
             @sensitive = "true"
+        rawTimeStuff <: DATETIME:
+            @json_tag = "rawTimeStuff"
+            @time_format = "stdtime"
         timeStuff <: DATETIME:
             @json_tag = "timeStuff"
         responseStuff <: Response:
@@ -41,7 +66,7 @@ Simple "Simple Server" [package="simple"]:
 
     !alias integer:
         int
-        
+
     !type Response:
         Data <: set of Item
 
