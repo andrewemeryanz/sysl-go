@@ -966,6 +966,29 @@ CodeGenTransform:
       out = callList flatten(.out)
     )
 
+  !view customErrorTypes(types <: set of Type) -> sequence of TopLevelDecl:
+    types where("error" in .attrs.patterns) -> (type:
+      let typeName = "*" + type.key
+      Comment = '// ' + typeName + ' error'
+      Declaration = type -> <Declaration> (:
+        VarDeclWithVal = type -> <VarDeclWithVal> (:
+          identifier = type.key
+          Type = "CustomerError"
+
+          let nameAttribute = '"name":"' + type.key + '"'
+          let attributes = type.value.fields -> <sequence of string> (field:
+            let fvalue = field.value.attrs -> <sequence of string> (f:
+              out = f.value
+            )
+            out = ',"' + field.key + '" : "' + Join(fvalue flatten(.out), "") + '"'
+          )
+
+          Expression = type -> <Expression>(:
+            ValueExpr = "map[string]string{" +  nameAttribute + Join(attributes flatten(.out), "") + "}"
+          )
+        )
+      )
+    )
   !view goFile(app <: sysl.App, module <: sysl.Module, basePath <: string) -> goFile:
     app -> (:
       PackageClause = app -> <PackageClause> (:
@@ -1067,6 +1090,63 @@ CodeGenTransform:
         )
       )
 
+      let generatedMapError = [.name] -> <sequence of TopLevelDecl> (name:
+        Comment = "// GeneratedMapError for " + name
+        FunctionDecl = name -> <FunctionDecl>(:
+          FunctionName = "GeneratedMapError"
+          Signature = name -> <Signature> (:
+            Parameters = name -> <Parameters>(:
+              ParameterList = name -> <ParameterList>(:
+                ParameterDecl = paramDecl("ctx", "context.Context")
+                let genCallback = name -> <ParameterDeclC>(:
+                  ParameterDecl = name -> <ParameterDecl>(:
+                    Identifier = "err"
+                    TypeName = "error"
+                  )
+                )
+
+                let clientParam = makeClientParam(app, module) flatten(.out) -> <set of out>(p:
+                  out = p
+                )
+
+                ParameterDeclC = [genCallback] |  clientParam flatten(.out)
+              )
+            )
+
+            Result = name -> <Result> (:
+              TypeName = "*common.HTTPError"
+            )
+          )
+          Block = name -> <Block>(:
+            let mapError = app.types where("error" in .attrs.patterns) -> <sequence of StatementList> (type:
+              Statement = name -> <StatementList>(:
+                IfElseStmt = name -> <IfElseStmt> (:
+                  Expression = makeValueExpr("errors.As(err, " + type.key + ")")
+                  Block = name -> <Block> (:
+                    let returnStmt = name -> <StatementList> (:
+                      Statement = name -> <Statement> (:
+                        ReturnStmt = name -> <returnStmt>(:
+                          PayLoad = type.key+".HandleError()"
+                        )
+                      )
+                    )
+                    StatementList = [returnStmt]
+                  )
+                )
+              )
+            )
+            let returnNilStmt = name -> <StatementList> (:
+              Statement = name -> <Statement> (:
+                ReturnStmt = name -> <ReturnStmt> (:
+                  PayLoad = "nil"
+                )
+              )
+            )
+            StatementList = mapError | [returnNilStmt]
+          )
+        )
+      )
+
 
       let handleErrorMapAndWrite = [.name]  -> <sequence of TopLevelDecl> (name:
         Comment = "// Handler Error "
@@ -1113,16 +1193,16 @@ CodeGenTransform:
             )
           )
           Block = name -> <Block>(:
-            let mapError = name -> <StatementList> (:
+            let customError = name -> <StatementList> (:
               Statement = name -> <Statement>(:
                 DeclareAndAssignStmt = name -> <DeclareAndAssignStmt>(:
                   Variables = "httpError"
                   Expression = name -> <Expression>(:
                     FunctionCall = name -> <FunctionCall>(:
-                      FunctionName = "s.genCallback.MapError"
+                      FunctionName = "GeneratedMapError"
                       FunctionArgs = name -> <FunctionArgs>(:
                         Expression = name -> <Expression>(:
-                          ValueExpr = "ctx, kind, message, cause"
+                          ValueExpr = "ctx, err"
                         )
                       )
                     )
@@ -1130,6 +1210,36 @@ CodeGenTransform:
                 )
               )
             )
+
+            let httpError = name -> <StatementList>(:
+              Statement = name -> <StatementList>(:
+                IfElseStmt = name -> <IfElseStmt> (:
+                  Expression = makeValueExpr("httpError == nil")
+                  Block = name -> <Block> (:
+                    let returnStmt = name -> <StatementList> (:
+                      Statement = name -> <Statement> (:
+                        DeclareAndAssignStmt = name -> <DeclareAndAssignStmt>(:
+                          Variables = "httpError"
+                          Expression = name -> <Expression>(:
+                            FunctionCall = name -> <FunctionCall>(:
+                              FunctionName = "common.HandleError"
+                              FunctionArgs = name -> <FunctionArgs>(:
+                                Expression = name -> <Expression>(:
+                                  ValueExpr = "ctx, err"
+                                )
+                              )
+                            )
+                          )
+                        )
+                      )
+                    )
+                    StatementList = [returnStmt]
+                  )
+                )
+              )
+            
+            )
+
             let writeError = name -> <StatementList>(:
               Statement = name -> <Statement>(:
                 FunctionCall = name -> <FunctionCall>(:
@@ -1142,14 +1252,14 @@ CodeGenTransform:
                 )
               )
             )
-            StatementList = [mapError, writeError]
+            StatementList = [customError, httpError, writeError]
           )
         )
       )
 
       Comment = "// Code generated by sysl DO NOT EDIT.\n"
 
-      TopLevelDecl = svcInterface | serviceHandlerStruct | newServiceHandler | handleErrorMapAndWrite | EpHandlerMethodDecl(app, pname, module)
+      TopLevelDecl = customErrorTypes(app.types) | svcInterface | serviceHandlerStruct | newServiceHandler | generatedMapError | handleErrorMapAndWrite | EpHandlerMethodDecl(app, pname, module)
     )
 
   !view IsDataBaseApp(app <: sysl.App) -> string:

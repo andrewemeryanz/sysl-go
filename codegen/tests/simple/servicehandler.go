@@ -4,6 +4,7 @@ package simple
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/anz-bank/sysl-go/common"
@@ -11,6 +12,12 @@ import (
 	"github.com/anz-bank/sysl-go/restlib"
 	"github.com/anz-bank/sysl-go/validator"
 )
+
+// *BusinessLogicError error
+var BusinessLogicError = map[string]string{"name": "BusinessLogicError", "http_code": "1001", "http_message": "foo", "http_status": "500"}
+
+// *BusinessLogicError2 error
+var BusinessLogicError2 = map[string]string{"name": "BusinessLogicError2", "http_code": "1002", "http_message": "foo2", "http_status": "501"}
 
 // Handler interface for Simple
 type Handler interface {
@@ -32,9 +39,26 @@ func NewServiceHandler(genCallback GenCallback, serviceInterface *ServiceInterfa
 	return &ServiceHandler{genCallback, serviceInterface}
 }
 
+// GeneratedMapError for Simple
+func GeneratedMapError(ctx context.Context, err error) *common.HTTPError {
+	if errors.As(err, BusinessLogicError) {
+		return BusinessLogicError.HandleError()
+	}
+
+	if errors.As(err, BusinessLogicError2) {
+		return BusinessLogicError2.HandleError()
+	}
+
+	return nil
+}
+
 // Handler Error
 func (s *ServiceHandler) handleError(ctx context.Context, w http.ResponseWriter, kind common.Kind, message string, cause error) {
-	httpError := s.genCallback.MapError(ctx, kind, message, cause)
+	httpError := GeneratedMapError(ctx, err)
+	if httpError == nil {
+		httpError := common.HandleError(ctx, err)
+	}
+
 	httpError.WriteError(ctx, w)
 }
 
