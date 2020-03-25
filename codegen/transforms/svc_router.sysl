@@ -157,25 +157,13 @@ CodeGenTransform:
                 Identifier = "ctx"
                 TypeName = "context.Context"
               )
-              let k = app -> <ParameterList>(:
-                ParameterDecl = app -> <ParameterDecl>(:
-                  Identifier = "kind"
-                  TypeName = "common.Kind"
-                )
-              )
-              let m = app -> <ParameterList>(:
-                ParameterDecl = app -> <ParameterDecl>(:
-                  Identifier = "message"
-                  TypeName = "string"
-                )
-              )
               let c = app -> <ParameterList>(:
                 ParameterDecl = app -> <ParameterDecl>(:
                   Identifier = "cause"
                   TypeName = "error"
                 )
               )
-              ParameterDeclC = [k,m,c]
+              ParameterDeclC = [c]
             )
           )
           Result = app -> <Result>(:

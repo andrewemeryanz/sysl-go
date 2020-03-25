@@ -35,18 +35,26 @@ func NewServiceHandler(genCallback GenCallback, serviceInterface *ServiceInterfa
 	return &ServiceHandler{genCallback, serviceInterface, db}
 }
 
-// GeneratedMapError for DbEndpoints
-func GeneratedMapError(ctx context.Context, err error) *common.HTTPError {
-	return nil
-}
-
 // Handler Error
 func (s *ServiceHandler) handleError(ctx context.Context, w http.ResponseWriter, kind common.Kind, message string, cause error) {
-	httpError := GeneratedMapError(ctx, err)
-	if httpError == nil {
-		httpError := common.HandleError(ctx, err)
+	serverError := common.CreateError(ctx, kind, message, cause)
+	httpError := s.genCallback.MapError(ctx, serverError)
+	if httpError != nil {
+		httpError.WriteError(ctx, w)
+		return
 	}
 
+	t, ok := cause.(common.CustomError)
+	commonError := common.HTTPError(ctx, serverError)
+	if ok {
+		e := t.HTTPError()
+		httpError = &e
+		httpError.WriteError(ctx, w)
+		return
+	}
+
+	commonError := common.HTTPError(ctx, serverError)
+	httpError = &commonError
 	httpError.WriteError(ctx, w)
 }
 

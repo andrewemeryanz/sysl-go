@@ -4,7 +4,6 @@ package simple
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 
 	"github.com/anz-bank/sysl-go/common"
@@ -14,10 +13,10 @@ import (
 )
 
 // *BusinessLogicError error
-var BusinessLogicError = map[string]string{"name": "BusinessLogicError", "http_code": "1001", "http_message": "foo", "http_status": "500"}
+var businesslogicerror = map[string]string{"name": "BusinessLogicError", "http_code": "1001", "http_message": "foo", "http_status": "500"}
 
 // *BusinessLogicError2 error
-var BusinessLogicError2 = map[string]string{"name": "BusinessLogicError2", "http_code": "1002", "http_message": "foo2", "http_status": "501"}
+var businesslogicerror2 = map[string]string{"name": "BusinessLogicError2", "http_code": "1002", "http_message": "foo2", "http_status": "501"}
 
 // Handler interface for Simple
 type Handler interface {
@@ -39,26 +38,26 @@ func NewServiceHandler(genCallback GenCallback, serviceInterface *ServiceInterfa
 	return &ServiceHandler{genCallback, serviceInterface}
 }
 
-// GeneratedMapError for Simple
-func GeneratedMapError(ctx context.Context, err error) *common.HTTPError {
-	if errors.As(err, BusinessLogicError) {
-		return BusinessLogicError.HandleError()
-	}
-
-	if errors.As(err, BusinessLogicError2) {
-		return BusinessLogicError2.HandleError()
-	}
-
-	return nil
-}
-
 // Handler Error
 func (s *ServiceHandler) handleError(ctx context.Context, w http.ResponseWriter, kind common.Kind, message string, cause error) {
-	httpError := GeneratedMapError(ctx, err)
-	if httpError == nil {
-		httpError := common.HandleError(ctx, err)
+	serverError := common.CreateError(ctx, kind, message, cause)
+	httpError := s.genCallback.MapError(ctx, serverError)
+	if httpError != nil {
+		httpError.WriteError(ctx, w)
+		return
 	}
 
+	t, ok := cause.(common.CustomError)
+	commonError := common.HTTPError(ctx, serverError)
+	if ok {
+		e := t.HTTPError()
+		httpError = &e
+		httpError.WriteError(ctx, w)
+		return
+	}
+
+	commonError := common.HTTPError(ctx, serverError)
+	httpError = &commonError
 	httpError.WriteError(ctx, w)
 }
 
