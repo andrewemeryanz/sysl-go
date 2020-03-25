@@ -62,10 +62,12 @@ func (s *ServiceHandler) handleError(ctx context.Context, w http.ResponseWriter,
 	commonError := common.HandleError(ctx, serverError)
 	httpError = &commonError
 	httpError.WriteError(ctx, w)
+}
+
 // GetJustOkAndJustErrorListHandler ...
 func (s *ServiceHandler) GetJustOkAndJustErrorListHandler(w http.ResponseWriter, r *http.Request) {
 	if s.serviceInterface.GetJustOkAndJustErrorList == nil {
-		s.genCallback.HandleError(r.Context(), w, common.InternalError, "not implemented", nil)
+		s.handleError(r.Context(), w, common.InternalError, "not implemented", nil)
 		return
 	}
 
@@ -77,7 +79,7 @@ func (s *ServiceHandler) GetJustOkAndJustErrorListHandler(w http.ResponseWriter,
 	defer cancel()
 	valErr := validator.Validate(&req)
 	if valErr != nil {
-		s.genCallback.HandleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
+		s.handleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
 		return
 	}
 
@@ -85,7 +87,7 @@ func (s *ServiceHandler) GetJustOkAndJustErrorListHandler(w http.ResponseWriter,
 
 	err := s.serviceInterface.GetJustOkAndJustErrorList(ctx, &req, client)
 	if err != nil {
-		s.genCallback.HandleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
+		s.handleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
 		return
 	}
 
@@ -97,7 +99,7 @@ func (s *ServiceHandler) GetJustOkAndJustErrorListHandler(w http.ResponseWriter,
 // GetJustReturnErrorListHandler ...
 func (s *ServiceHandler) GetJustReturnErrorListHandler(w http.ResponseWriter, r *http.Request) {
 	if s.serviceInterface.GetJustReturnErrorList == nil {
-		s.genCallback.HandleError(r.Context(), w, common.InternalError, "not implemented", nil)
+		s.handleError(r.Context(), w, common.InternalError, "not implemented", nil)
 		return
 	}
 
@@ -109,7 +111,7 @@ func (s *ServiceHandler) GetJustReturnErrorListHandler(w http.ResponseWriter, r 
 	defer cancel()
 	valErr := validator.Validate(&req)
 	if valErr != nil {
-		s.genCallback.HandleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
+		s.handleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
 		return
 	}
 
@@ -117,7 +119,7 @@ func (s *ServiceHandler) GetJustReturnErrorListHandler(w http.ResponseWriter, r 
 
 	err := s.serviceInterface.GetJustReturnErrorList(ctx, &req, client)
 	if err != nil {
-		s.genCallback.HandleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
+		s.handleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
 		return
 	}
 
@@ -129,7 +131,7 @@ func (s *ServiceHandler) GetJustReturnErrorListHandler(w http.ResponseWriter, r 
 // GetJustReturnOkListHandler ...
 func (s *ServiceHandler) GetJustReturnOkListHandler(w http.ResponseWriter, r *http.Request) {
 	if s.serviceInterface.GetJustReturnOkList == nil {
-		s.genCallback.HandleError(r.Context(), w, common.InternalError, "not implemented", nil)
+		s.handleError(r.Context(), w, common.InternalError, "not implemented", nil)
 		return
 	}
 
@@ -141,7 +143,7 @@ func (s *ServiceHandler) GetJustReturnOkListHandler(w http.ResponseWriter, r *ht
 	defer cancel()
 	valErr := validator.Validate(&req)
 	if valErr != nil {
-		s.genCallback.HandleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
+		s.handleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
 		return
 	}
 
@@ -149,7 +151,7 @@ func (s *ServiceHandler) GetJustReturnOkListHandler(w http.ResponseWriter, r *ht
 
 	err := s.serviceInterface.GetJustReturnOkList(ctx, &req, client)
 	if err != nil {
-		s.genCallback.HandleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
+		s.handleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
 		return
 	}
 
@@ -161,7 +163,7 @@ func (s *ServiceHandler) GetJustReturnOkListHandler(w http.ResponseWriter, r *ht
 // GetOkTypeAndJustErrorListHandler ...
 func (s *ServiceHandler) GetOkTypeAndJustErrorListHandler(w http.ResponseWriter, r *http.Request) {
 	if s.serviceInterface.GetOkTypeAndJustErrorList == nil {
-		s.genCallback.HandleError(r.Context(), w, common.InternalError, "not implemented", nil)
+		s.handleError(r.Context(), w, common.InternalError, "not implemented", nil)
 		return
 	}
 
@@ -173,7 +175,7 @@ func (s *ServiceHandler) GetOkTypeAndJustErrorListHandler(w http.ResponseWriter,
 	defer cancel()
 	valErr := validator.Validate(&req)
 	if valErr != nil {
-		s.genCallback.HandleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
+		s.handleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
 		return
 	}
 
@@ -181,7 +183,7 @@ func (s *ServiceHandler) GetOkTypeAndJustErrorListHandler(w http.ResponseWriter,
 
 	response, err := s.serviceInterface.GetOkTypeAndJustErrorList(ctx, &req, client)
 	if err != nil {
-		s.genCallback.HandleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
+		s.handleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
 		return
 	}
 
