@@ -44,6 +44,7 @@ type Status struct {
 type Stuff struct {
 	EmptyStuff     Empty                  `json:"emptyStuff"`
 	InnerStuff     string                 `json:"innerStuff"`
+	RawTimeStuff   time.Time              `json:"rawTimeStuff"`
 	ResponseStuff  Response               `json:"responseStuff"`
 	SensitiveStuff common.SensitiveString `json:"sensitiveStuff"`
 	TimeStuff      convert.JSONTime       `json:"timeStuff"`
@@ -52,6 +53,22 @@ type Stuff struct {
 // Generate wrapper set type
 type ItemSet struct {
 	M map[string]Item
+}
+
+// GetJustOkAndJustErrorListRequest ...
+type GetJustOkAndJustErrorListRequest struct {
+}
+
+// GetJustReturnErrorListRequest ...
+type GetJustReturnErrorListRequest struct {
+}
+
+// GetJustReturnOkListRequest ...
+type GetJustReturnOkListRequest struct {
+}
+
+// GetOkTypeAndJustErrorListRequest ...
+type GetOkTypeAndJustErrorListRequest struct {
 }
 
 // GetOopsListRequest ...

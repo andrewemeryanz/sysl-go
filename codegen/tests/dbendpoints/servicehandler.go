@@ -127,5 +127,5 @@ func (s *ServiceHandler) GetCompanyLocationListHandler(w http.ResponseWriter, r 
 
 	headermap, httpstatus := common.RespHeaderAndStatusFromContext(ctx)
 	restlib.SetHeaders(w, headermap)
-	restlib.SendHTTPResponse(w, httpstatus, getcompanylocationresponse, err)
+	restlib.SendHTTPResponse(w, httpstatus, getcompanylocationresponse)
 }
