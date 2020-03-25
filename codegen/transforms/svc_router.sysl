@@ -167,7 +167,7 @@ CodeGenTransform:
             )
           )
           Result = app -> <Result>(:
-            TypeName = "common.HTTPError"
+            TypeName = "*common.HTTPError"
           )
         )
 

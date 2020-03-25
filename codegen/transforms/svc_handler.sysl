@@ -1267,7 +1267,7 @@ CodeGenTransform:
                   Variables = "commonError"
                   Expression = name -> <Expression>(:
                     FunctionCall = name -> <FunctionCall>(:
-                      FunctionName = "common.HTTPError"
+                      FunctionName = "common.HandleError"
                       FunctionArgs = name -> <FunctionArgs> (:
                         Expression = makeValueExpr("ctx")
                         let serverErrorP = name -> <FuncArgsRest> (:
@@ -1290,7 +1290,7 @@ CodeGenTransform:
                 )
               )
             )
-            StatementList = [serverError, httpError, httpErrorCondition, typeCheck, assignCommonError, customErrorCheck, assignCommonError, assignErrorPointer, writeError]
+            StatementList = [serverError, httpError, httpErrorCondition, typeCheck, customErrorCheck, assignCommonError, assignErrorPointer, writeError]
           )
         )
       )

@@ -26,10 +26,9 @@ func (c Callback) Config() validator.Validator {
 	return Config{}
 }
 
-func (c Callback) MapError(ctx context.Context, kind common.Kind, message string, cause error) common.HTTPError {
-	se := common.CreateError(ctx, kind, message, cause)
-
-	return common.HandleError(ctx, se)
+func (c Callback) MapError(ctx context.Context, cause error) *common.HTTPError {
+	handleError := common.HandleError(ctx, cause)
+	return &handleError
 }
 
 func (c Callback) AddMiddleware(ctx context.Context, r chi.Router) {

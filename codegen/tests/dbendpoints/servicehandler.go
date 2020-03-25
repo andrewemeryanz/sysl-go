@@ -45,7 +45,6 @@ func (s *ServiceHandler) handleError(ctx context.Context, w http.ResponseWriter,
 	}
 
 	t, ok := cause.(common.CustomError)
-	commonError := common.HTTPError(ctx, serverError)
 	if ok {
 		e := t.HTTPError()
 		httpError = &e
@@ -53,7 +52,7 @@ func (s *ServiceHandler) handleError(ctx context.Context, w http.ResponseWriter,
 		return
 	}
 
-	commonError := common.HTTPError(ctx, serverError)
+	commonError := common.HandleError(ctx, serverError)
 	httpError = &commonError
 	httpError.WriteError(ctx, w)
 }
