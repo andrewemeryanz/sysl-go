@@ -25,7 +25,6 @@ func getOrDefault(m map[string]string, key string, dflt string) string {
 	value, ok := m[key]
 	if ok {
 		return value
-	} else {
-		return dflt
 	}
+	return dflt
 }
