@@ -18,6 +18,11 @@ func NewDefaultSimpleImpl() *DefaultSimpleImpl {
 	return &DefaultSimpleImpl{}
 }
 
+// GetApiDocsList Client
+type GetApiDocsListClient struct {
+	GetApiDocsList func(ctx context.Context, req *deps.GetApiDocsListRequest) (*deps.ApiDoc, error)
+}
+
 // GetJustOkAndJustErrorList Client
 type GetJustOkAndJustErrorListClient struct {
 }
@@ -32,11 +37,6 @@ type GetJustReturnOkListClient struct {
 
 // GetOkTypeAndJustErrorList Client
 type GetOkTypeAndJustErrorListClient struct {
-}
-
-// GetApiDocsList Client
-type GetApiDocsListClient struct {
-	GetApiDocsList func(ctx context.Context, req *deps.GetApiDocsListRequest) (*deps.ApiDoc, error)
 }
 
 // GetOopsList Client
@@ -61,11 +61,11 @@ type PostStuffClient struct {
 
 // ServiceInterface for Simple
 type ServiceInterface struct {
+	GetApiDocsList            func(ctx context.Context, req *GetApiDocsListRequest, client GetApiDocsListClient) (*deps.ApiDoc, error)
 	GetJustOkAndJustErrorList func(ctx context.Context, req *GetJustOkAndJustErrorListRequest, client GetJustOkAndJustErrorListClient) error
 	GetJustReturnErrorList    func(ctx context.Context, req *GetJustReturnErrorListRequest, client GetJustReturnErrorListClient) error
 	GetJustReturnOkList       func(ctx context.Context, req *GetJustReturnOkListRequest, client GetJustReturnOkListClient) error
 	GetOkTypeAndJustErrorList func(ctx context.Context, req *GetOkTypeAndJustErrorListRequest, client GetOkTypeAndJustErrorListClient) (*Response, error)
-	GetApiDocsList            func(ctx context.Context, req *GetApiDocsListRequest, client GetApiDocsListClient) (*deps.ApiDoc, error)
 	GetOopsList               func(ctx context.Context, req *GetOopsListRequest, client GetOopsListClient) (*Response, error)
 	GetRawList                func(ctx context.Context, req *GetRawListRequest, client GetRawListClient) (*Str, error)
 	GetRawIntList             func(ctx context.Context, req *GetRawIntListRequest, client GetRawIntListClient) (*Integer, error)

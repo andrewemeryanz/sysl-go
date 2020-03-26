@@ -54,5 +54,5 @@ func (s *ServiceHandler) GetApiDocsListHandler(w http.ResponseWriter, r *http.Re
 
 	headermap, httpstatus := common.RespHeaderAndStatusFromContext(ctx)
 	restlib.SetHeaders(w, headermap)
-	restlib.SendHTTPResponse(w, httpstatus, apidoc, err)
+	restlib.SendHTTPResponse(w, httpstatus, apidoc)
 }

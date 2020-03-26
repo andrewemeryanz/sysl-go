@@ -38,6 +38,134 @@ func NewServiceHandler(genCallback GenCallback, serviceInterface *ServiceInterfa
 	return &ServiceHandler{genCallback, serviceInterface, depsDepsService}
 }
 
+// GetJustOkAndJustErrorListHandler ...
+func (s *ServiceHandler) GetJustOkAndJustErrorListHandler(w http.ResponseWriter, r *http.Request) {
+	if s.serviceInterface.GetJustOkAndJustErrorList == nil {
+		s.genCallback.HandleError(r.Context(), w, common.InternalError, "not implemented", nil)
+		return
+	}
+
+	ctx := common.RequestHeaderToContext(r.Context(), r.Header)
+	ctx = common.RespHeaderAndStatusToContext(ctx, make(http.Header), http.StatusOK)
+	var req GetJustOkAndJustErrorListRequest
+
+	ctx, cancel := s.genCallback.DownstreamTimeoutContext(ctx)
+	defer cancel()
+	valErr := validator.Validate(&req)
+	if valErr != nil {
+		s.genCallback.HandleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
+		return
+	}
+
+	client := GetJustOkAndJustErrorListClient{}
+
+	err := s.serviceInterface.GetJustOkAndJustErrorList(ctx, &req, client)
+	if err != nil {
+		s.genCallback.HandleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
+		return
+	}
+
+	headermap, httpstatus := common.RespHeaderAndStatusFromContext(ctx)
+	restlib.SetHeaders(w, headermap)
+	restlib.SendHTTPResponse(w, httpstatus, nil)
+}
+
+// GetJustReturnErrorListHandler ...
+func (s *ServiceHandler) GetJustReturnErrorListHandler(w http.ResponseWriter, r *http.Request) {
+	if s.serviceInterface.GetJustReturnErrorList == nil {
+		s.genCallback.HandleError(r.Context(), w, common.InternalError, "not implemented", nil)
+		return
+	}
+
+	ctx := common.RequestHeaderToContext(r.Context(), r.Header)
+	ctx = common.RespHeaderAndStatusToContext(ctx, make(http.Header), http.StatusOK)
+	var req GetJustReturnErrorListRequest
+
+	ctx, cancel := s.genCallback.DownstreamTimeoutContext(ctx)
+	defer cancel()
+	valErr := validator.Validate(&req)
+	if valErr != nil {
+		s.genCallback.HandleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
+		return
+	}
+
+	client := GetJustReturnErrorListClient{}
+
+	err := s.serviceInterface.GetJustReturnErrorList(ctx, &req, client)
+	if err != nil {
+		s.genCallback.HandleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
+		return
+	}
+
+	headermap, httpstatus := common.RespHeaderAndStatusFromContext(ctx)
+	restlib.SetHeaders(w, headermap)
+	restlib.SendHTTPResponse(w, httpstatus, nil)
+}
+
+// GetJustReturnOkListHandler ...
+func (s *ServiceHandler) GetJustReturnOkListHandler(w http.ResponseWriter, r *http.Request) {
+	if s.serviceInterface.GetJustReturnOkList == nil {
+		s.genCallback.HandleError(r.Context(), w, common.InternalError, "not implemented", nil)
+		return
+	}
+
+	ctx := common.RequestHeaderToContext(r.Context(), r.Header)
+	ctx = common.RespHeaderAndStatusToContext(ctx, make(http.Header), http.StatusOK)
+	var req GetJustReturnOkListRequest
+
+	ctx, cancel := s.genCallback.DownstreamTimeoutContext(ctx)
+	defer cancel()
+	valErr := validator.Validate(&req)
+	if valErr != nil {
+		s.genCallback.HandleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
+		return
+	}
+
+	client := GetJustReturnOkListClient{}
+
+	err := s.serviceInterface.GetJustReturnOkList(ctx, &req, client)
+	if err != nil {
+		s.genCallback.HandleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
+		return
+	}
+
+	headermap, httpstatus := common.RespHeaderAndStatusFromContext(ctx)
+	restlib.SetHeaders(w, headermap)
+	restlib.SendHTTPResponse(w, httpstatus, nil)
+}
+
+// GetOkTypeAndJustErrorListHandler ...
+func (s *ServiceHandler) GetOkTypeAndJustErrorListHandler(w http.ResponseWriter, r *http.Request) {
+	if s.serviceInterface.GetOkTypeAndJustErrorList == nil {
+		s.genCallback.HandleError(r.Context(), w, common.InternalError, "not implemented", nil)
+		return
+	}
+
+	ctx := common.RequestHeaderToContext(r.Context(), r.Header)
+	ctx = common.RespHeaderAndStatusToContext(ctx, make(http.Header), http.StatusOK)
+	var req GetOkTypeAndJustErrorListRequest
+
+	ctx, cancel := s.genCallback.DownstreamTimeoutContext(ctx)
+	defer cancel()
+	valErr := validator.Validate(&req)
+	if valErr != nil {
+		s.genCallback.HandleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
+		return
+	}
+
+	client := GetOkTypeAndJustErrorListClient{}
+
+	response, err := s.serviceInterface.GetOkTypeAndJustErrorList(ctx, &req, client)
+	if err != nil {
+		s.genCallback.HandleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
+		return
+	}
+
+	headermap, httpstatus := common.RespHeaderAndStatusFromContext(ctx)
+	restlib.SetHeaders(w, headermap)
+	restlib.SendHTTPResponse(w, httpstatus, response)
+}
+
 // GetApiDocsListHandler ...
 func (s *ServiceHandler) GetApiDocsListHandler(w http.ResponseWriter, r *http.Request) {
 	if s.serviceInterface.GetApiDocsList == nil {
@@ -70,262 +198,6 @@ func (s *ServiceHandler) GetApiDocsListHandler(w http.ResponseWriter, r *http.Re
 	headermap, httpstatus := common.RespHeaderAndStatusFromContext(ctx)
 	restlib.SetHeaders(w, headermap)
 	restlib.SendHTTPResponse(w, httpstatus, apidoc, err)
-}
-
-// GetJustOkAndJustErrorListHandler ...
-func (s *ServiceHandler) GetJustOkAndJustErrorListHandler(w http.ResponseWriter, r *http.Request) {
-	if s.serviceInterface.GetJustOkAndJustErrorList == nil {
-		s.genCallback.HandleError(r.Context(), w, common.InternalError, "not implemented", nil)
-		return
-	}
-
-	ctx := common.RequestHeaderToContext(r.Context(), r.Header)
-	ctx = common.RespHeaderAndStatusToContext(ctx, make(http.Header), http.StatusOK)
-	var req GetJustOkAndJustErrorListRequest
-
-	ctx, cancel := s.genCallback.DownstreamTimeoutContext(ctx)
-	defer cancel()
-	valErr := validator.Validate(&req)
-	if valErr != nil {
-		s.genCallback.HandleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
-		return
-	}
-
-	client := GetJustOkAndJustErrorListClient{}
-
-	err := s.serviceInterface.GetJustOkAndJustErrorList(ctx, &req, client)
-	if err != nil {
-		s.genCallback.HandleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
-		return
-	}
-
-	headermap, httpstatus := common.RespHeaderAndStatusFromContext(ctx)
-	restlib.SetHeaders(w, headermap)
-	restlib.SendHTTPResponse(w, httpstatus, nil)
-}
-
-// GetJustReturnErrorListHandler ...
-func (s *ServiceHandler) GetJustReturnErrorListHandler(w http.ResponseWriter, r *http.Request) {
-	if s.serviceInterface.GetJustReturnErrorList == nil {
-		s.genCallback.HandleError(r.Context(), w, common.InternalError, "not implemented", nil)
-		return
-	}
-
-	ctx := common.RequestHeaderToContext(r.Context(), r.Header)
-	ctx = common.RespHeaderAndStatusToContext(ctx, make(http.Header), http.StatusOK)
-	var req GetJustReturnErrorListRequest
-
-	ctx, cancel := s.genCallback.DownstreamTimeoutContext(ctx)
-	defer cancel()
-	valErr := validator.Validate(&req)
-	if valErr != nil {
-		s.genCallback.HandleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
-		return
-	}
-
-	client := GetJustReturnErrorListClient{}
-
-	err := s.serviceInterface.GetJustReturnErrorList(ctx, &req, client)
-	if err != nil {
-		s.genCallback.HandleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
-		return
-	}
-
-	headermap, httpstatus := common.RespHeaderAndStatusFromContext(ctx)
-	restlib.SetHeaders(w, headermap)
-	restlib.SendHTTPResponse(w, httpstatus, nil)
-}
-
-// GetJustReturnOkListHandler ...
-func (s *ServiceHandler) GetJustReturnOkListHandler(w http.ResponseWriter, r *http.Request) {
-	if s.serviceInterface.GetJustReturnOkList == nil {
-		s.genCallback.HandleError(r.Context(), w, common.InternalError, "not implemented", nil)
-		return
-	}
-
-	ctx := common.RequestHeaderToContext(r.Context(), r.Header)
-	ctx = common.RespHeaderAndStatusToContext(ctx, make(http.Header), http.StatusOK)
-	var req GetJustReturnOkListRequest
-
-	ctx, cancel := s.genCallback.DownstreamTimeoutContext(ctx)
-	defer cancel()
-	valErr := validator.Validate(&req)
-	if valErr != nil {
-		s.genCallback.HandleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
-		return
-	}
-
-	client := GetJustReturnOkListClient{}
-
-	err := s.serviceInterface.GetJustReturnOkList(ctx, &req, client)
-	if err != nil {
-		s.genCallback.HandleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
-		return
-	}
-
-	headermap, httpstatus := common.RespHeaderAndStatusFromContext(ctx)
-	restlib.SetHeaders(w, headermap)
-	restlib.SendHTTPResponse(w, httpstatus, nil)
-}
-
-// GetOkTypeAndJustErrorListHandler ...
-func (s *ServiceHandler) GetOkTypeAndJustErrorListHandler(w http.ResponseWriter, r *http.Request) {
-	if s.serviceInterface.GetOkTypeAndJustErrorList == nil {
-		s.genCallback.HandleError(r.Context(), w, common.InternalError, "not implemented", nil)
-		return
-	}
-
-	ctx := common.RequestHeaderToContext(r.Context(), r.Header)
-	ctx = common.RespHeaderAndStatusToContext(ctx, make(http.Header), http.StatusOK)
-	var req GetOkTypeAndJustErrorListRequest
-
-	ctx, cancel := s.genCallback.DownstreamTimeoutContext(ctx)
-	defer cancel()
-	valErr := validator.Validate(&req)
-	if valErr != nil {
-		s.genCallback.HandleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
-		return
-	}
-
-	client := GetOkTypeAndJustErrorListClient{}
-
-	response, err := s.serviceInterface.GetOkTypeAndJustErrorList(ctx, &req, client)
-	if err != nil {
-		s.genCallback.HandleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
-		return
-	}
-
-	headermap, httpstatus := common.RespHeaderAndStatusFromContext(ctx)
-	restlib.SetHeaders(w, headermap)
-	restlib.SendHTTPResponse(w, httpstatus, response)
-}
-
-// GetJustOkAndJustErrorListHandler ...
-func (s *ServiceHandler) GetJustOkAndJustErrorListHandler(w http.ResponseWriter, r *http.Request) {
-	if s.serviceInterface.GetJustOkAndJustErrorList == nil {
-		s.genCallback.HandleError(r.Context(), w, common.InternalError, "not implemented", nil)
-		return
-	}
-
-	ctx := common.RequestHeaderToContext(r.Context(), r.Header)
-	ctx = common.RespHeaderAndStatusToContext(ctx, make(http.Header), http.StatusOK)
-	var req GetJustOkAndJustErrorListRequest
-
-	ctx, cancel := s.genCallback.DownstreamTimeoutContext(ctx)
-	defer cancel()
-	valErr := validator.Validate(&req)
-	if valErr != nil {
-		s.genCallback.HandleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
-		return
-	}
-
-	client := GetJustOkAndJustErrorListClient{}
-
-	err := s.serviceInterface.GetJustOkAndJustErrorList(ctx, &req, client)
-	if err != nil {
-		s.genCallback.HandleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
-		return
-	}
-
-	headermap, httpstatus := common.RespHeaderAndStatusFromContext(ctx)
-	restlib.SetHeaders(w, headermap)
-	restlib.SendHTTPResponse(w, httpstatus, nil)
-}
-
-// GetJustReturnErrorListHandler ...
-func (s *ServiceHandler) GetJustReturnErrorListHandler(w http.ResponseWriter, r *http.Request) {
-	if s.serviceInterface.GetJustReturnErrorList == nil {
-		s.genCallback.HandleError(r.Context(), w, common.InternalError, "not implemented", nil)
-		return
-	}
-
-	ctx := common.RequestHeaderToContext(r.Context(), r.Header)
-	ctx = common.RespHeaderAndStatusToContext(ctx, make(http.Header), http.StatusOK)
-	var req GetJustReturnErrorListRequest
-
-	ctx, cancel := s.genCallback.DownstreamTimeoutContext(ctx)
-	defer cancel()
-	valErr := validator.Validate(&req)
-	if valErr != nil {
-		s.genCallback.HandleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
-		return
-	}
-
-	client := GetJustReturnErrorListClient{}
-
-	err := s.serviceInterface.GetJustReturnErrorList(ctx, &req, client)
-	if err != nil {
-		s.genCallback.HandleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
-		return
-	}
-
-	headermap, httpstatus := common.RespHeaderAndStatusFromContext(ctx)
-	restlib.SetHeaders(w, headermap)
-	restlib.SendHTTPResponse(w, httpstatus, nil)
-}
-
-// GetJustReturnOkListHandler ...
-func (s *ServiceHandler) GetJustReturnOkListHandler(w http.ResponseWriter, r *http.Request) {
-	if s.serviceInterface.GetJustReturnOkList == nil {
-		s.genCallback.HandleError(r.Context(), w, common.InternalError, "not implemented", nil)
-		return
-	}
-
-	ctx := common.RequestHeaderToContext(r.Context(), r.Header)
-	ctx = common.RespHeaderAndStatusToContext(ctx, make(http.Header), http.StatusOK)
-	var req GetJustReturnOkListRequest
-
-	ctx, cancel := s.genCallback.DownstreamTimeoutContext(ctx)
-	defer cancel()
-	valErr := validator.Validate(&req)
-	if valErr != nil {
-		s.genCallback.HandleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
-		return
-	}
-
-	client := GetJustReturnOkListClient{}
-
-	err := s.serviceInterface.GetJustReturnOkList(ctx, &req, client)
-	if err != nil {
-		s.genCallback.HandleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
-		return
-	}
-
-	headermap, httpstatus := common.RespHeaderAndStatusFromContext(ctx)
-	restlib.SetHeaders(w, headermap)
-	restlib.SendHTTPResponse(w, httpstatus, nil)
-}
-
-// GetOkTypeAndJustErrorListHandler ...
-func (s *ServiceHandler) GetOkTypeAndJustErrorListHandler(w http.ResponseWriter, r *http.Request) {
-	if s.serviceInterface.GetOkTypeAndJustErrorList == nil {
-		s.genCallback.HandleError(r.Context(), w, common.InternalError, "not implemented", nil)
-		return
-	}
-
-	ctx := common.RequestHeaderToContext(r.Context(), r.Header)
-	ctx = common.RespHeaderAndStatusToContext(ctx, make(http.Header), http.StatusOK)
-	var req GetOkTypeAndJustErrorListRequest
-
-	ctx, cancel := s.genCallback.DownstreamTimeoutContext(ctx)
-	defer cancel()
-	valErr := validator.Validate(&req)
-	if valErr != nil {
-		s.genCallback.HandleError(ctx, w, common.BadRequestError, "Invalid request", valErr)
-		return
-	}
-
-	client := GetOkTypeAndJustErrorListClient{}
-
-	response, err := s.serviceInterface.GetOkTypeAndJustErrorList(ctx, &req, client)
-	if err != nil {
-		s.genCallback.HandleError(ctx, w, common.DownstreamUnexpectedResponseError, "Downstream failure", err)
-		return
-	}
-
-	headermap, httpstatus := common.RespHeaderAndStatusFromContext(ctx)
-	restlib.SetHeaders(w, headermap)
-	restlib.SendHTTPResponse(w, httpstatus, response)
 }
 
 // GetOopsListHandler ...
