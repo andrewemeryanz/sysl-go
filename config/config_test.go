@@ -17,10 +17,10 @@ type TestServer struct {
 
 type TestAdminServer struct {
 	ContextTimeout time.Duration `yaml:"contextTimeout"`
-	Http           TestHttp      `yaml:"http"`
+	HTTP           TestHTTP      `yaml:"http"`
 }
 
-type TestHttp struct {
+type TestHTTP struct {
 	BasePath     string `yaml:"basePath"`
 	ReadTimeout  string `yaml:"readTimeout"`
 	WriteTimeout string `yaml:"writeTimeout"`
@@ -39,8 +39,9 @@ func TestSReadConfig(t *testing.T) {
 	gen := GenCodeConfig{}
 	gen.Downstream = &TestDownstreamConfig{}
 	myConfig := TestMyConfig{}
-	ReadConfig("testdata/config.yaml", &lib, &gen, &myConfig)
+	err := ReadConfig("testdata/config.yaml", &lib, &gen, &myConfig)
 
+	require.Nil(t, err)
 	require.Equal(t, time.Duration(2*time.Second), myConfig.Server.AdminServer.ContextTimeout)
 	require.Equal(t, "/admintest", myConfig.Server.AdminServer.Http.BasePath)
 
