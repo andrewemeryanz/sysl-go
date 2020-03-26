@@ -64,6 +64,10 @@ type GetJustReturnOkListRequest struct {
 type GetOkTypeAndJustErrorListRequest struct {
 }
 
+// GetApiDocsListRequest ...
+type GetApiDocsListRequest struct {
+}
+
 // GetOopsListRequest ...
 type GetOopsListRequest struct {
 }
