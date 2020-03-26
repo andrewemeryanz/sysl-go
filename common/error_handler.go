@@ -14,9 +14,7 @@ const (
 	unknownError          = "Unknown Error"
 )
 
-func HandleError(ctx context.Context, w http.ResponseWriter, kind Kind, message string, cause error,
-	httpErrorMapper func(context.Context, error) *HTTPError) {
-
+func HandleError(ctx context.Context, w http.ResponseWriter, kind Kind, message string, cause error, httpErrorMapper func(context.Context, error) *HTTPError) {
 	logEntry := GetLogEntryFromContext(ctx)
 	logEntry.Error(cause)
 
