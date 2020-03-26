@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )
 
@@ -35,20 +36,25 @@ type TestDownstreamConfig struct {
 func TestSReadConfig(t *testing.T) {
 	t.Parallel()
 
-	lib := LibraryConfig{}
-	gen := GenCodeConfig{}
-	gen.Downstream = &TestDownstreamConfig{}
+	defaultConfig := DefaultConfig{
+		Library: LibraryConfig{},
+		GenCode: GenCodeConfig{
+			Downstream: &TestDownstreamConfig{},
+		},
+	}
 	myConfig := TestMyConfig{}
-	err := ReadConfig("testdata/config.yaml", &lib, &gen, &myConfig)
+	err := ReadConfig("testdata/config.yaml", &defaultConfig, &myConfig)
 
 	require.Nil(t, err)
-	require.Equal(t, time.Duration(2*time.Second), myConfig.Server.AdminServer.ContextTimeout)
-	require.Equal(t, "/admintest", myConfig.Server.AdminServer.Http.BasePath)
 
-	require.False(t, lib.Log.ReportCaller)
+	require.Equal(t, 2*time.Second, myConfig.Server.AdminServer.ContextTimeout)
+	require.Equal(t, "/admintest", myConfig.Server.AdminServer.HTTP.BasePath)
 
-	require.Equal(t, 8080, gen.Upstream.HTTP.Common.Port)
-	require.Equal(t, 8081, gen.Upstream.GRPC.Port)
-	require.Equal(t, time.Duration(120*time.Second), gen.Downstream.(*TestDownstreamConfig).Foo.ClientTimeout)
-	require.Equal(t, "https://bar.example.com", gen.Downstream.(*TestDownstreamConfig).Bar.ServiceURL)
+	require.True(t, defaultConfig.Library.Log.ReportCaller)
+	require.Equal(t, logrus.WarnLevel, defaultConfig.Library.Log.Level)
+
+	require.Equal(t, 8080, defaultConfig.GenCode.Upstream.HTTP.Common.Port)
+	require.Equal(t, 8081, defaultConfig.GenCode.Upstream.GRPC.Port)
+	require.Equal(t, 120*time.Second, defaultConfig.GenCode.Downstream.(*TestDownstreamConfig).Foo.ClientTimeout)
+	require.Equal(t, "https://bar.example.com", defaultConfig.GenCode.Downstream.(*TestDownstreamConfig).Bar.ServiceURL)
 }
