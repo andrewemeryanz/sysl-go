@@ -16,13 +16,6 @@ var _ = time.Parse
 // Reference imports to suppress unused errors
 var _ = date.Parse
 
-// BusinessLogicError ...
-type BusinessLogicError struct {
-	Http_code    string `json:"http_code"`
-	Http_message string `json:"http_message"`
-	Http_status  string `json:"http_status"`
-}
-
 // Item ...
 type Item struct {
 	A1   string `json:"A1"`
@@ -94,11 +87,6 @@ type GetStuffListRequest struct {
 // PostStuffRequest ...
 type PostStuffRequest struct {
 	Request Str
-}
-
-// *BusinessLogicError validator
-func (s *BusinessLogicError) Validate() error {
-	return validator.Validate(s)
 }
 
 // *Item validator

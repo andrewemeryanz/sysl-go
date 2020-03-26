@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+	"net/http"
 )
 
 const (
@@ -13,7 +14,29 @@ const (
 	unknownError          = "Unknown Error"
 )
 
-func HandleError(ctx context.Context, err error) HTTPError {
+func HandleError(ctx context.Context, w http.ResponseWriter, kind Kind, message string, cause error,
+	httpErrorMapper func(context.Context, error) *HTTPError) {
+
+	logEntry := GetLogEntryFromContext(ctx)
+	logEntry.Error(cause)
+
+	err := CreateError(ctx, kind, message, cause)
+	httpError := httpErrorMapper(ctx, err)
+
+	if httpError == nil {
+		switch t := cause.(type) {
+		case CustomError:
+			e := t.HTTPError()
+			httpError = &e
+		default:
+			e := MapError(ctx, err)
+			httpError = &e
+		}
+	}
+	httpError.WriteError(ctx, w)
+}
+
+func MapError(ctx context.Context, err error) HTTPError {
 	logEntry := GetLogEntryFromContext(ctx)
 	logEntry.Error(err)
 

@@ -30,8 +30,7 @@ func (c Callback) Config() validator.Validator {
 }
 
 func (c Callback) MapError(ctx context.Context, cause error) *common.HTTPError {
-	handleError := common.HandleError(ctx, cause)
-	return &handleError
+	return nil
 }
 
 func (c Callback) AddMiddleware(ctx context.Context, r chi.Router) {

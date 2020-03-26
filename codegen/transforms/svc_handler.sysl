@@ -88,7 +88,7 @@ CodeGenTransform:
             let interfaceCall = condition -> <StatementList> (:
               Statement = condition -> <Statement> (:
                 FunctionCall = condition -> <ReturnStmt> (:
-                  FunctionName = "s.handleError"
+                  FunctionName = "common.HandleError"
                   FunctionArgs = condition -> <FunctionArgs> (:
                     Expression = makeValueExpr("ctx")
                     let writer = condition -> <FuncArgsRest> (:
@@ -103,7 +103,10 @@ CodeGenTransform:
                     let error = errorObj -> <FuncArgsRest> (:
                       Expression = makeValueExpr(errorObj)
                     )
-                    FuncArgsRest = [writer, code, msg, error]
+                    let mapErrorCallback = errorCode -> <FunctionArgs> (:
+                      Expression = makeValueExpr("s.genCallback.MapError")
+                    )
+                    FuncArgsRest = [writer, code, msg, error, mapErrorCallback]
                   )
                 )
               )
@@ -131,7 +134,7 @@ CodeGenTransform:
             let interfaceCall = condition -> <StatementList> (:
               Statement = condition -> <Statement> (:
                 FunctionCall = condition -> <ReturnStmt> (:
-                  FunctionName = "s.handleError"
+                  FunctionName = "common.HandleError"
                   FunctionArgs = condition -> <FunctionArgs> (:
                     Expression = makeValueExpr("ctx")
                     let writer = condition -> <FuncArgsRest> (:
@@ -146,7 +149,10 @@ CodeGenTransform:
                     let error = errorObj -> <FuncArgsRest> (:
                       Expression = makeValueExpr(errorObj)
                     )
-                    FuncArgsRest = [writer, code, msg, error]
+                    let mapErrorCallback = errorCode -> <FunctionArgs> (:
+                      Expression = makeValueExpr("s.genCallback.MapError")
+                    )
+                    FuncArgsRest = [writer, code, msg, error, mapErrorCallback]
                   )
                 )
               )
@@ -680,7 +686,7 @@ CodeGenTransform:
               IfElseStmt = implFuncName -> <IfElseStmt>(:
                 Expression = makeValueExpr("s.serviceInterface." + implFuncName + " == nil")
                 Block = implFuncName -> <Block>(:
-                    let handleError =  makeFunctionCall("s.handleError", makeValueExpr("r.Context()"), [makeValueExpr("w"), makeValueExpr("common.InternalError"), makeValueExpr('"not implemented"'), makeValueExpr("nil")])
+                    let handleError =  makeFunctionCall("common.HandleError", makeValueExpr("r.Context()"), [makeValueExpr("w"), makeValueExpr("common.InternalError"), makeValueExpr('"not implemented"'), makeValueExpr("nil"), makeValueExpr("s.genCallback.MapError")])
 
                     let returnError = implFuncName -> <StatementList>(:
                       Statement = implFuncName -> <Statement>(:
@@ -970,7 +976,7 @@ CodeGenTransform:
       Comment = '// ' + typeName + ' error'
       Declaration = type -> <Declaration> (:
         VarDeclWithVal = type -> <VarDeclWithVal> (:
-          identifier = ToLower(type.key)
+          identifier = type.key
           Type = "CustomerError"
 
           let nameAttribute = '"name":"' + type.key + '"'
@@ -1088,214 +1094,9 @@ CodeGenTransform:
         )
       )
 
-      let handleErrorMapAndWrite = [.name]  -> <sequence of TopLevelDecl> (name:
-        Comment = "// Handler Error "
-        
-        MethodDecl = name -> <FunctionDecl>(:
-          FunctionName = "handleError"
-          Receiver = name -> <Receiver>(:
-            ReceiverType = "s *ServiceHandler"       
-          )
-          Signature = name -> <Signature> (:
-            Parameters = name -> <Parameters>(:
-              ParameterList = name -> <ParameterList>(:
-                ParameterDecl = paramDecl("ctx", "context.Context")
-                let responseWriter = name -> <ParameterDeclC>(:
-                  ParameterDecl = name -> <ParameterDecl>(:
-                    Identifier = "w"
-                    TypeName = "http.ResponseWriter"
-                  )
-                )
-
-                let kind = name -> <ParameterDeclC>(:
-                  ParameterDecl = name -> <ParameterDecl>(:
-                    Identifier = "kind"
-                    TypeName = "common.Kind"
-                  )
-                )
-
-                let message = name -> <ParameterDeclC>(:
-                  ParameterDecl = name -> <ParameterDecl>(:
-                    Identifier = "message"
-                    TypeName = "string"
-                  )
-                )
-
-                let cause = name -> <ParameterDeclC>(:
-                  ParameterDecl = name -> <ParameterDecl>(:
-                    Identifier = "cause"
-                    TypeName = "error"
-                  )
-                )
-
-                ParameterDeclC = [responseWriter, kind, message, cause]
-              )
-            )
-          )
-          Block = name -> <Block>(:
-            let serverError = name -> <StatementList> (:
-              Statement = name -> <Statement>(:
-                DeclareAndAssignStmt = name -> <DeclareAndAssignStmt>(:
-                  Variables = "serverError"
-                  Expression = name -> <Expression>(:
-                    FunctionCall = name -> <FunctionCall>(:
-                      FunctionName = "common.CreateError"
-                      FunctionArgs = name -> <FunctionArgs>(:
-                        Expression = makeValueExpr("ctx")
-                        FuncArgsRest = [name] -> <sequence of FuncArgsRest>(a:
-                          Expression = makeValueExpr("kind, message, cause")
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            )
-
-            let httpError = name -> <StatementList>(:
-              Statement = name -> <StatementList>(:
-                DeclareAndAssignStmt = name -> <DeclareAndAssignStmt>(:
-                  Variables = "httpError"
-                  Expression = name -> <Expression>(:
-                    FunctionCall = name -> <FunctionCall>(:
-                      FunctionName = "s.genCallback.MapError"
-                      FunctionArgs = name -> <FunctionArgs>(:
-                        Expression = makeValueExpr("ctx")
-                        FuncArgsRest = [name] -> <sequence of FuncArgsRest>(a:
-                          Expression = makeValueExpr("serverError")
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            )
-            let httpErrorCondition = name -> <StatementList>(:
-              Statement = name -> <StatementList>(:
-                IfElseStmt = name -> <IfElseStmt> (:
-                  Expression = makeValueExpr("httpError != nil")
-                  Block = name -> <Block> (:
-                    let handleError =  makeFunctionCall("httpError.WriteError", makeValueExpr("ctx"), makeValueExpr("w"))
-
-                    let returnError = name -> <StatementList>(:
-                      Statement = name -> <Statement>(:
-                        ReturnStmt = name -> <ReturnStmt>(:
-                          PayLoad = ""
-                        )
-                      )
-                    )
-                    StatementList = [handleError, returnError]                    
-                  )
-                )
-              )
-            
-            )
-            let typeCheck = name -> <StatementList>(:
-              Statement = name -> <Statement>(:
-                DeclareAndAssignStmt = name -> <DeclareAndAssignStmt>(:
-                  Variables = "t, ok"
-                  Expression = name -> <Expression>(:
-                    FunctionCall = name -> <FunctionCall>(:
-                      FunctionName = "cause."
-                      FunctionArgs = name -> <FunctionArgs>(:
-                        Expression = makeValueExpr("common.CustomError")
-                      )
-                    )
-                  )
-                )
-              )
-            )
-            let writeError = name -> <StatementList>(:
-              Statement = name -> <Statement>(:
-                FunctionCall = name -> <FunctionCall>(:
-                  FunctionName = "httpError.WriteError"
-                  FunctionArgs = name -> <FunctionArgs>(:
-                    Expression = name -> <Expression>(:
-                      ValueExpr = "ctx, w"
-                    )
-                  )
-                )
-              )
-            )
-
-            let customErrorCheck = name -> <StatementList>(:
-              Statement = name -> <StatementList>(:
-                IfElseStmt = name -> <IfElseStmt>(:
-                  Expression = makeValueExpr("ok")
-                  Block = name -> <Block> (:
-                    let assignError = name -> <StatementList>(:
-                      Statement = name -> <StatementList>(:
-                        DeclareAndAssignStmt = name -> <DeclareAndAssignStmt>(:
-                          Variables = "e"
-                          Expression = name -> <Expression>(:
-                            FunctionCall = name -> <FunctionCall>(:
-                              FunctionName = "t.HTTPError"
-                            )
-                          )
-                        )
-                      )
-                    )
-                    let assignPointer = name -> <StatementList>(:
-                      Statement = name -> <StatementList>(:
-                        AssignStmt = name -> <AssignStmt>(:
-                          Variables = "httpError"
-                          Expression = name -> <Expression>(:
-                            ValueExpr = "&e"
-                          )
-                        )
-                      )
-                    )
-
-                    let returnStmt = name -> <StatementList>(:
-                      Statement = name -> <Statement>(:
-                        ReturnStmt = name -> <ReturnStmt>(:
-                          PayLoad = ""
-                        )
-                      )
-                    )
-                    StatementList = [assignError, assignPointer, writeError, returnStmt]
-                  )
-                )
-              )
-            
-            )
-            let assignCommonError = name -> <StatementList>(:
-              Statement = name -> <StatementList>(:
-                DeclareAndAssignStmt = name -> <DeclareAndAssignStmt>(:
-                  Variables = "commonError"
-                  Expression = name -> <Expression>(:
-                    FunctionCall = name -> <FunctionCall>(:
-                      FunctionName = "common.HandleError"
-                      FunctionArgs = name -> <FunctionArgs> (:
-                        Expression = makeValueExpr("ctx")
-                        let serverErrorP = name -> <FuncArgsRest> (:
-                          Expression = makeValueExpr("serverError")
-                        )
-                        FuncArgsRest = [serverErrorP]
-                      )
-                    )
-                  )
-                )
-              )
-            )
-            let assignErrorPointer = name -> <StatementList>(:
-              Statement = name -> <StatementList>(:
-                AssignStmt = name -> <AssignStmt>(:
-                  Variables = "httpError"
-                  Expression = name -> <Expression>(:
-                    ValueExpr = "&commonError"
-                  )
-                )
-              )
-            )
-            StatementList = [serverError, httpError, httpErrorCondition, typeCheck, customErrorCheck, assignCommonError, assignErrorPointer, writeError]
-          )
-        )
-      )
-
       Comment = "// Code generated by sysl DO NOT EDIT.\n"
 
-      TopLevelDecl = customErrorTypes(app.types) | svcInterface | serviceHandlerStruct | newServiceHandler | handleErrorMapAndWrite | EpHandlerMethodDecl(app, pname, module)
+      TopLevelDecl = customErrorTypes(app.types where(.attrs count > 0 && "patterns" in .attrs)) | svcInterface | serviceHandlerStruct | newServiceHandler | EpHandlerMethodDecl(app, pname, module)
     )
 
   !view IsDataBaseApp(app <: sysl.App) -> string:
