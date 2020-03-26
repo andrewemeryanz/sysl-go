@@ -972,14 +972,14 @@ CodeGenTransform:
 
   !view customErrorTypes(types <: set of Type) -> sequence of TopLevelDecl:
     types where("error" in .attrs.patterns) -> (type:
-      let typeName = "*" + type.key
+      let typeName = "*" + Title(type.key)
       Comment = '// ' + typeName + ' error'
       Declaration = type -> <Declaration> (:
         VarDeclWithVal = type -> <VarDeclWithVal> (:
-          identifier = type.key
+          identifier = Title(type.key)
           Type = "CustomerError"
 
-          let nameAttribute = '"name":"' + type.key + '"'
+          let nameAttribute = '"name":"' + Title(type.key) + '"'
           let attributes = type.value.fields -> <sequence of string> (field:
             let fvalue = field.value.attrs -> <sequence of string> (f:
               out = f.value

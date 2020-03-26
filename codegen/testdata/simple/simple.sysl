@@ -66,7 +66,7 @@ Simple "Simple Server" [package="simple"]:
         http_code <: string [value = "1001"]
         http_message <: string [value = "foo"]
 
-    !type BusinessLogicError2 [~error]:
+    !type businessLogicError2 [~error]:
         http_status <: string [value = "501"]
         http_code <: string [value = "1002"]
         http_message <: string [value = "foo2"]
