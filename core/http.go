@@ -25,6 +25,23 @@ type RestManager interface {
 	PublicServerConfig() *config.CommonHTTPServerConfig
 }
 
+type restManager struct {
+	config   *config.DefaultConfig
+	handlers []handlerinitialiser.RestHandlerInitialiser
+}
+
+func NewRestManager(config *config.DefaultConfig, handlers []handlerinitialiser.RestHandlerInitialiser) core.RestManager {
+	return &restManager{config, handlers}
+}
+
+func (m *restManager) EnabledHandlers() []handlerinitialiser.RestHandlerInitialiser {
+	return m.handlers
+}
+
+func (m *restManager) PublicServerConfig() *config.CommonHTTPServerConfig {
+	return &m.config.GenCode.Upstream.HTTP
+}
+
 type middlewareCollection struct {
 	admin  []func(handler http.Handler) http.Handler
 	public []func(handler http.Handler) http.Handler

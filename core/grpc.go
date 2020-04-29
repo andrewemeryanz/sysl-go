@@ -18,6 +18,23 @@ type GrpcManager interface {
 	GrpcPublicServerConfig() *config.CommonServerConfig
 }
 
+type grpcManager struct {
+	config   *config.DefaultConfig
+	handlers []handlerinitialiser.GrpcHandlerInitialiser
+}
+
+func NewGrpcManager(config *config.DefaultConfig, handlers []handlerinitialiser.GrpcHandlerInitialiser) GrpcManager {
+	return &grpcManager{config, handlers}
+}
+
+func (m *grpcManager) EnabledGrpcHandlers() []handlerinitialiser.GrpcHandlerInitialiser {
+	return m.handlers
+}
+
+func (m *grpcManager) GrpcPublicServerConfig() *config.CommonServerConfig {
+	return &m.config.GenCode.Upstream.GRPC
+}
+
 func configurePublicGrpcServerListener(ctx context.Context, hl GrpcManager, logger *logrus.Logger) (func() error, error) {
 	server, err := newGrpcServer(hl.GrpcPublicServerConfig(), logger)
 	if err != nil {

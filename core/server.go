@@ -11,6 +11,25 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type ServerParams struct {
+	Ctx                context.Context
+	Name               string
+	Config             *config.DefaultConfig
+	RestManager        RestManager
+	GrpcManager        GrpcManager
+	PrometheusRegistry *prometheus.Registry
+	LogHook            log.Hook
+}
+
+func NewServerParams(ctx context.Context, name string, config *config.DefaultConfig) *ServerParams {
+	return &ServerParams{Ctx: ctx, Name: name, Config: config,}
+}
+
+func (b *ServerParams) Start() error {
+	// TODO: complete
+	return nil
+}
+
 //nolint:gocognit // Long method names are okay because only generated code will call this, not humans.
 func Server(ctx context.Context, name string, libraryConfig *config.LibraryConfig,
 	hl RestManager, grpcHl GrpcManager,
