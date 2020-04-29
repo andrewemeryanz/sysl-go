@@ -630,3 +630,24 @@ func TestApiDocsReturnsSequence(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, len(*sequenceRes) > 0)
 }
+
+// EXAMPLE SERVER START
+
+type CustomConfig struct{}
+type CustomRestCallback struct{}
+type CustomGrpcCallback struct{}
+type CustomLogHook struct{}
+
+func Start(ctx context.Context, file string) error {
+	customConfig := CustomConfig{}
+	return StartServer(file, &customConfig, func(cfg *config.DefaultConfig) (*Server, error) {
+		serviceInterface := ServiceInterface{}
+		restGenCallback := CustomRestCallback{}
+		grpcGenCallback := CustomGrpcCallback{}
+		hook := CustomLogHook{}
+		return NewServer(ctx, cfg).
+			WithRest(&serviceInterface, &restGenCallback).
+			WithGrpc(&serviceInterface, &grpcGenCallback).
+			WithLogHook(&hook), nil
+	})
+}

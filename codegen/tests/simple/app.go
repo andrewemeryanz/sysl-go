@@ -35,3 +35,23 @@ func InitialiseHandlers(coreCfg *config.DefaultConfig, serviceInterface ServiceI
 	httpHandlers := []handlerinitialiser.HandlerInitialiser{serviceRouter}
 	return &HandlerInit{RestHandlers: httpHandlers}, err
 }
+
+func BuildDownstreamClients(
+	cfg *config.DefaultConfig) (*DownstreamClients, error) {
+	// TODO: https://github.com/anz-bank/sysl-go/issues/84
+	return nil
+}
+
+func BuildRestHandlerInitialiser(
+	serviceInterface ServiceInterface,
+	callback core.RestGenCallback,
+	downstream *DownstreamClients) handlerinitialiser.RestHandlerInitialiser {
+	// TODO: https://github.com/anz-bank/sysl-go/issues/84
+}
+
+func BuildGrpcHandlerInitialiser(
+	serviceInterface ServiceInterface,
+	callback core.GrpcGenCallback,
+	downstream *DownstreamClients) handlerinitialiser.GrpcHandlerInitialiser {
+	// TODO: complete https://github.com/anz-bank/sysl-go/issues/84
+}
