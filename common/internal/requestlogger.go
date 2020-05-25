@@ -2,12 +2,13 @@ package internal
 
 import (
 	"bytes"
+	"context"
 	"io/ioutil"
 	"net/http"
 
-	"github.com/go-chi/chi/middleware"
+	"github.com/anz-bank/pkg/log"
 
-	"github.com/sirupsen/logrus"
+	"github.com/go-chi/chi/middleware"
 )
 
 type RequestLogger interface {
@@ -23,12 +24,18 @@ type httpData struct {
 }
 
 type requestLogger struct {
-	e          *logrus.Entry
-	req        httpData
-	resp       httpData
-	protoMajor int
-	rw         http.ResponseWriter
-	flushed    bool
+	ctx             context.Context
+	req             httpData
+	resp            httpData
+	protoMajor      int
+	rw              http.ResponseWriter
+	flushed         bool
+	IsDebugLogLevel bool
+}
+
+type IsDebugLogLevelKey struct{}
+type IsDebugLogLevel struct {
+	Flag bool
 }
 
 func (r *requestLogger) LogResponse(resp *http.Response) {
@@ -46,7 +53,6 @@ func (r *requestLogger) LogResponse(resp *http.Response) {
 func (r *requestLogger) ResponseWriter(base http.ResponseWriter) http.ResponseWriter {
 	rw := middleware.NewWrapResponseWriter(base, r.protoMajor)
 	rw.Tee(&r.resp.body)
-
 	r.rw = rw
 
 	return rw
@@ -54,7 +60,7 @@ func (r *requestLogger) ResponseWriter(base http.ResponseWriter) http.ResponseWr
 
 func (r *requestLogger) FlushLog() {
 	if r.flushed {
-		r.e.Info("Already flushed the request")
+		log.Info(r.ctx, "Already flushed the request")
 		return
 	}
 	r.flushed = true
@@ -62,16 +68,12 @@ func (r *requestLogger) FlushLog() {
 		r.resp.header = r.rw.Header()
 	}
 
+	fields := log.With("logger", "common/internal/requestlogger.go").With("func", "FlushLog()")
+
 	reqBody := r.req.body.String()
-	r.e.WithFields(logrus.Fields{
-		"logger": "common/internal/requestlogger.go",
-		"func":   "FlushLog()",
-	}).Debugf("Request: header - %s\nbody[len:%v]: - %s", r.req.header, len(reqBody), reqBody)
+	fields.Debugf(r.ctx, "Request: header - %s\nbody[len:%v]: - %s", r.req.header, len(reqBody), reqBody)
 	respBody := r.resp.body.String()
-	r.e.WithFields(logrus.Fields{
-		"logger": "common/internal/requestlogger.go",
-		"func":   "FlushLog()",
-	}).Debugf("Response: header - %s\nbody[len:%v]: - %s", r.resp.header, len(respBody), respBody)
+	fields.Debugf(r.ctx, "Response: header - %s\nbody[len:%v]: - %s", r.resp.header, len(respBody), respBody)
 }
 
 type nopLogger struct{}
@@ -80,10 +82,11 @@ func (r *nopLogger) LogResponse(_ *http.Response)                               
 func (r *nopLogger) ResponseWriter(base http.ResponseWriter) http.ResponseWriter { return base }
 func (r *nopLogger) FlushLog()                                                   {}
 
-func NewRequestLogger(entry *logrus.Entry, req *http.Request) (RequestLogger, *logrus.Entry) {
-	if entry.Logger.IsLevelEnabled(logrus.DebugLevel) {
+func NewRequestLogger(ctx context.Context, req *http.Request, isDebug bool) (RequestLogger, context.Context) {
+	//nolint: // TODO: store debug logging flag against context (outside of logger): Context#withValue
+	if isDebug {
 		l := &requestLogger{
-			e:          entry.WithFields(InitFieldsFromRequest(req)),
+			ctx:        InitFieldsFromRequest(req).Onto(ctx),
 			protoMajor: req.ProtoMajor,
 		}
 		l.req.header = req.Header.Clone()
@@ -93,7 +96,7 @@ func NewRequestLogger(entry *logrus.Entry, req *http.Request) (RequestLogger, *l
 			req.Body = ioutil.NopCloser(bytes.NewBuffer(b))
 			l.req.body.Write(b)
 		}
-		return l, l.e
+		return l, l.ctx
 	}
-	return &nopLogger{}, entry
+	return &nopLogger{}, ctx
 }
