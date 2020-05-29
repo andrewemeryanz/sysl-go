@@ -99,7 +99,7 @@ func TestEndToEndValidRequestResponse(t *testing.T) {
 
 	go func() {
 		err := core.Server(context.Background(), "test",
-			nil, &handlerManager, nil)
+			nil, &handlerManager, nil, nil)
 		serverError <- err
 	}()
 

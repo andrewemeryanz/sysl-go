@@ -125,9 +125,11 @@ func TestLoggingTransport_RoundTripLogFields(t *testing.T) {
 	statusFound := false
 	for _, entry := range hook.Entries {
 		entryTraceIDName, _ := entry.Data.Get(distributedTraceIDName)
+		entrySpanIDName, _ := entry.Data.Get(distributedSpanIDName)
+		entryDistributedParentSpanIDName, _ := entry.Data.Get(distributedParentSpanIDName)
 		require.Equal(t, "this is trace id", entryTraceIDName)
-		// require.Equal(t, "this is span id", entry.Data.Get(distributedSpanIDName))
-		// require.Nil(t, entry.Data.Get(distributedParentSpanIDName))
+		require.Equal(t, "this is span id", entrySpanIDName)
+		require.Nil(t, entryDistributedParentSpanIDName)
 		if entry.Verbose {
 			debugCount++
 			if entry.Message == "Response: header - map[]\nbody[len:9]: - resp body" {

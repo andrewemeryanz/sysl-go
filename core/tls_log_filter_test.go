@@ -1,32 +1,37 @@
 package core
 
-// func TestTLSLogFilter_Write(t *testing.T) {
-// 	type testData struct {
-// 		in    string
-// 		level logrus.Level
-// 	}
+import (
+	"fmt"
+	"log"
+	"regexp"
+	"testing"
 
-// 	for i, tt := range []testData{
-// 		{
-// 			in:    "hit hit\n",
-// 			level: logrus.DebugLevel,
-// 		},
-// 		{
-// 			in:    "misssssss\n",
-// 			level: logrus.WarnLevel,
-// 		},
-// 	} {
-// 		tt := tt
-// 		t.Run(fmt.Sprintf("TestTLSLogFilter_Write-%d", i), func(t *testing.T) {
-// 			ctx, hook := common.NewTestContextWithLoggerHook()
+	pkgLog "github.com/anz-bank/pkg/log"
+	"github.com/anz-bank/sysl-go/common"
+	"github.com/stretchr/testify/require"
+)
 
-// 			re := regexp.MustCompile(`hit`)
-// 			writer := &TLSLogFilter{logger, re}
-// 			serverLogger := log.New(writer, "", 0)
+func TestTLSLogFilter_Write(t *testing.T) {
+	type testData struct {
+		in string
+	}
+	for i, tt := range []testData{
+		{
+			in: "misssssss\n",
+		},
+	} {
+		tt := tt
+		t.Run(fmt.Sprintf("TestTLSLogFilter_Write-%d", i), func(t *testing.T) {
+			ctx, hook := common.NewTestContextWithLoggerHook()
+			logger := pkgLog.From(ctx)
+			re := regexp.MustCompile(`hit`)
+			writer := &TLSLogFilter{logger, re}
+			serverLogger := log.New(writer, "", 0)
 
-// 			serverLogger.Printf(tt.in)
+			serverLogger.Printf(tt.in)
 
-// 			require.Equal(t, 1, len(hook.Entries))
-// 		})
-// 	}
-// }
+			require.Equal(t, 1, len(hook.Entries))
+			require.Equal(t, tt.in, hook.LastEntry().Message)
+		})
+	}
+}

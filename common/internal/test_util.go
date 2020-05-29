@@ -17,6 +17,10 @@ func (h *TestHook) OnLogged(entry *log.LogEntry) error {
 
 func NewTestContextWithLoggerHook() (context.Context, *TestHook) {
 	loghook := TestHook{}
-	ctx := log.WithConfigs(log.AddHooks(&loghook)).Onto(context.Background())
+	ctxWithValue := context.WithValue(context.Background(), IsDebugLogLevelKey{},
+		&IsDebugLogLevel{
+			Flag: true,
+		})
+	ctx := log.WithConfigs(log.AddHooks(&loghook)).Onto(ctxWithValue)
 	return ctx, &loghook
 }

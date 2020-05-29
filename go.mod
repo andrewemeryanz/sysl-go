@@ -6,6 +6,7 @@ require (
 	github.com/anz-bank/pkg v0.0.0-20200420045650-cf83ae5f9219
 	github.com/go-chi/chi v4.0.4+incompatible
 	github.com/go-playground/universal-translator v0.17.0 // indirect
+	github.com/gobuffalo/logger v1.0.3 // indirect
 	github.com/golang/protobuf v1.3.5
 	github.com/google/uuid v1.1.1
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect

@@ -101,7 +101,7 @@ func TestValidRequestResponse(t *testing.T) {
 	serverError := make(chan error)
 
 	go func() {
-		err := core.Server(context.Background(), "test", nil, &handlerManager, nil)
+		err := core.Server(context.Background(), "test", nil, &handlerManager, nil, nil)
 		serverError <- err
 	}()
 

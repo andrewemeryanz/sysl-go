@@ -16,9 +16,8 @@ func NewLoggingRoundTripper(name string, base http.RoundTripper) http.RoundTripp
 }
 
 type coreRequestContext struct {
-	logger          *logrus.Logger
-	entry           *logrus.Entry
-	IsDebugLogLevel bool
+	logger *logrus.Logger
+	entry  *logrus.Entry
 }
 
 type reqHeaderContext struct {
@@ -80,7 +79,7 @@ func CoreRequestContextMiddleware() func(next http.Handler) http.Handler {
 
 			ctx = internal.AddResponseBodyMonitorToContext(ctx)
 			defer internal.CheckForUnclosedResponses(ctx)
-			reqLogger, entry := internal.NewRequestLogger(ctx, r, getCoreContext(ctx).IsDebugLogLevel)
+			reqLogger, entry := internal.NewRequestLogger(ctx, r)
 			w = reqLogger.ResponseWriter(w)
 			defer reqLogger.FlushLog()
 
@@ -97,6 +96,16 @@ func CoreRequestContextMiddleware() func(next http.Handler) http.Handler {
 }
 
 type coreRequestContextKey struct{}
+
+// Deprecated: github.com/anz-bank/pkg/log is replacing the logrus
+func GetLogEntryFromContext(ctx context.Context) *logrus.Entry {
+	return getCoreContext(ctx).entry
+}
+
+// Deprecated: github.com/anz-bank/pkg/log is replacing the logrus
+func GetLoggerFromContext(ctx context.Context) *logrus.Logger {
+	return getCoreContext(ctx).logger
+}
 
 func getCoreContext(ctx context.Context) *coreRequestContext {
 	return ctx.Value(coreRequestContextKey{}).(*coreRequestContext)

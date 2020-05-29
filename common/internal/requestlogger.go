@@ -13,9 +13,13 @@ import (
 
 type RequestLogger interface {
 	LogResponse(response *http.Response) // Calls Flush() automatically
-
 	ResponseWriter(http.ResponseWriter) http.ResponseWriter
 	FlushLog() // Must be called if using the ResponseWriter() func
+}
+
+type IsDebugLogLevelKey struct{}
+type IsDebugLogLevel struct {
+	Flag bool
 }
 
 type httpData struct {
@@ -24,18 +28,12 @@ type httpData struct {
 }
 
 type requestLogger struct {
-	ctx             context.Context
-	req             httpData
-	resp            httpData
-	protoMajor      int
-	rw              http.ResponseWriter
-	flushed         bool
-	IsDebugLogLevel bool
-}
-
-type IsDebugLogLevelKey struct{}
-type IsDebugLogLevel struct {
-	Flag bool
+	ctx        context.Context
+	req        httpData
+	resp       httpData
+	protoMajor int
+	rw         http.ResponseWriter
+	flushed    bool
 }
 
 func (r *requestLogger) LogResponse(resp *http.Response) {
@@ -82,9 +80,9 @@ func (r *nopLogger) LogResponse(_ *http.Response)                               
 func (r *nopLogger) ResponseWriter(base http.ResponseWriter) http.ResponseWriter { return base }
 func (r *nopLogger) FlushLog()                                                   {}
 
-func NewRequestLogger(ctx context.Context, req *http.Request, isDebug bool) (RequestLogger, context.Context) {
-	//nolint: // TODO: store debug logging flag against context (outside of logger): Context#withValue
-	if isDebug {
+func NewRequestLogger(ctx context.Context, req *http.Request) (RequestLogger, context.Context) {
+	isDebugLogLevelCtx := getDebugLogLevelCtx(ctx)
+	if isDebugLogLevelCtx != nil && isDebugLogLevelCtx.Flag {
 		l := &requestLogger{
 			ctx:        InitFieldsFromRequest(req).Onto(ctx),
 			protoMajor: req.ProtoMajor,
@@ -99,4 +97,12 @@ func NewRequestLogger(ctx context.Context, req *http.Request, isDebug bool) (Req
 		return l, l.ctx
 	}
 	return &nopLogger{}, ctx
+}
+
+func getDebugLogLevelCtx(ctx context.Context) *IsDebugLogLevel {
+	v, ok := ctx.Value(IsDebugLogLevelKey{}).(*IsDebugLogLevel)
+	if ok {
+		return v
+	}
+	return nil
 }

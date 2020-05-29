@@ -11,7 +11,7 @@ func TestServerStartWithoutHandlerPanic(t *testing.T) {
 	serverError := make(chan error)
 
 	require.Panics(t, func() {
-		err := Server(context.Background(), "test", nil, nil, nil)
+		err := Server(context.Background(), "test", nil, nil, nil, nil)
 		serverError <- err
 	})
 }

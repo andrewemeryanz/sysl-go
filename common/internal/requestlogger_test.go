@@ -10,49 +10,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNopLogger_FlushLog(t *testing.T) {
-	ctx, hook := NewTestContextWithLoggerHook()
-
-	req, err := http.NewRequest("GET", "http://example.com/foo", nil)
-	require.NoError(t, err)
-
-	l, _ := NewRequestLogger(ctx, req, true)
-
-	resp := http.Response{
-		Status:           "",
-		StatusCode:       200,
-		Proto:            "",
-		ProtoMajor:       0,
-		ProtoMinor:       0,
-		Header:           http.Header{},
-		Body:             ioutil.NopCloser(&bytes.Buffer{}),
-		ContentLength:    0,
-		TransferEncoding: nil,
-		Close:            false,
-		Uncompressed:     false,
-		Trailer:          nil,
-		Request:          nil,
-		TLS:              nil,
-	}
-	l.LogResponse(&resp)
-
-	require.Empty(t, hook.Entries)
-
-	// and should be no-ops
-	//rw := httptest.NewRecorder()
-	//require.Equal(t, rw, l.ResponseWriter(rw))
-
-	l.FlushLog()
-	require.NotEmpty(t, hook.Entries)
-}
-
 func TestLogger_FlushLog(t *testing.T) {
 	ctx, hook := NewTestContextWithLoggerHook()
 
 	req, err := http.NewRequest("GET", "http://example.com/foo", nil)
 	require.NoError(t, err)
 
-	l, _ := NewRequestLogger(ctx, req, true)
+	l, _ := NewRequestLogger(ctx, req)
 
 	resp := http.Response{
 		Status:           "",
@@ -74,11 +38,8 @@ func TestLogger_FlushLog(t *testing.T) {
 
 	require.Empty(t, hook.Entries)
 
-	// and should do a new error if we call flush
-	//hook.Reset()
 	l.FlushLog()
 	require.NotEmpty(t, hook.Entries)
-	//require.Equal(t, logrus.InfoLevel, hook.LastEntry().Level)
 }
 
 func TestRequestLogger_NilBody(t *testing.T) {
@@ -88,7 +49,7 @@ func TestRequestLogger_NilBody(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NotPanics(t, func() {
-		NewRequestLogger(ctx, req, true)
+		NewRequestLogger(ctx, req)
 	})
 }
 
@@ -98,7 +59,7 @@ func TestRequestLogger_ResponseWriter(t *testing.T) {
 	req, err := http.NewRequest("GET", "http://example.com/foo", nil)
 	require.NoError(t, err)
 
-	l, _ := NewRequestLogger(ctx, req, true)
+	l, _ := NewRequestLogger(ctx, req)
 	rw := l.ResponseWriter(httptest.NewRecorder())
 
 	_, _ = rw.Write([]byte("hello"))

@@ -5,12 +5,15 @@ package core
 import (
 	"context"
 
+	"github.com/anz-bank/pkg/log"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/sirupsen/logrus"
 )
 
 type ServerParams struct {
 	Ctx                context.Context
 	Name               string
+	logger             *logrus.Logger
 	restManager        Manager
 	grpcManager        GrpcManager
 	prometheusRegistry *prometheus.Registry
@@ -105,6 +108,38 @@ func WithRestManager(manager Manager) ServerOption {
 	return &restManagerOption{manager}
 }
 
+type loggerOption struct {
+	logger *logrus.Logger
+}
+
+func (o *loggerOption) apply(params *ServerParams) {
+	params.logger = o.logger
+}
+
+func WithLogrusLogger(logger *logrus.Logger) ServerOption {
+	return &loggerOption{logger}
+}
+
+type ctxOption struct {
+	ctx context.Context
+}
+
+func (o *ctxOption) apply(params *ServerParams) {
+	params.Ctx = o.ctx
+}
+
+func WithPkgLogger(configs ...log.Config) ServerOption {
+	ctx := context.Background()
+	logger := log.NewStandardLogger()
+	f := log.Fields{}
+	for _, o := range configs {
+		f = f.WithConfigs(o)
+	}
+
+	ctx = f.WithLogger(logger).Onto(ctx)
+	return &ctxOption{ctx}
+}
+
 func WithPrometheusRegistry(prometheusRegistry *prometheus.Registry) ServerOption {
 	return &prometheusRegistryOption{prometheusRegistry}
 }
@@ -130,8 +165,9 @@ func WithGrpcManager(manager GrpcManager) ServerOption {
 }
 
 //nolint:gocognit // Long method names are okay because only generated code will call this, not humans.
-func Server(ctx context.Context, name string, hl Manager, grpcHl GrpcManager, promRegistry *prometheus.Registry) error {
+func Server(ctx context.Context, name string, hl Manager, grpcHl GrpcManager, logger *logrus.Logger, promRegistry *prometheus.Registry) error {
 	return NewServerParams(ctx, name,
+		WithLogrusLogger(logger),
 		WithRestManager(hl),
 		WithGrpcManager(grpcHl),
 		WithPrometheusRegistry(promRegistry)).Start()
