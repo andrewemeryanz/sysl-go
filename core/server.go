@@ -132,10 +132,8 @@ func WithPkgLogger(configs ...log.Config) ServerOption {
 	ctx := context.Background()
 	logger := log.NewStandardLogger()
 	f := log.Fields{}
-	if configs != nil {
-		for _, o := range configs {
-			f = f.WithConfigs(o)
-		}
+	for _, o := range configs {
+		f = f.WithConfigs(o)
 	}
 	ctx = f.WithLogger(logger).Onto(ctx)
 	return &ctxOption{ctx}
