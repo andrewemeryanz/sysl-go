@@ -132,10 +132,11 @@ func WithPkgLogger(configs ...log.Config) ServerOption {
 	ctx := context.Background()
 	logger := log.NewStandardLogger()
 	f := log.Fields{}
-	for _, o := range configs {
-		f = f.WithConfigs(o)
+	if configs != nil {
+		for _, o := range configs {
+			f = f.WithConfigs(o)
+		}
 	}
-
 	ctx = f.WithLogger(logger).Onto(ctx)
 	return &ctxOption{ctx}
 }
@@ -167,6 +168,7 @@ func WithGrpcManager(manager GrpcManager) ServerOption {
 //nolint:gocognit // Long method names are okay because only generated code will call this, not humans.
 func Server(ctx context.Context, name string, hl Manager, grpcHl GrpcManager, logger *logrus.Logger, promRegistry *prometheus.Registry) error {
 	return NewServerParams(ctx, name,
+		WithPkgLogger(),
 		WithLogrusLogger(logger),
 		WithRestManager(hl),
 		WithGrpcManager(grpcHl),
