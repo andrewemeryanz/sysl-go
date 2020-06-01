@@ -10,6 +10,16 @@ import (
 	"github.com/anz-bank/pkg/log"
 )
 
+// Deprecated: Use ServerParams.WithPkgLogger instead
+func GetLogEntryFromContext(ctx context.Context) *logrus.Entry {
+	return getCoreContext(ctx).entry
+}
+
+// Deprecated: Use ServerParams.WithPkgLogger instead
+func GetLoggerFromContext(ctx context.Context) *logrus.Logger {
+	return getCoreContext(ctx).logger
+}
+
 func NewLoggingRoundTripper(name string, base http.RoundTripper) http.RoundTripper {
 	// temporary pass-through to get the real round tripper from the request context
 	return &tempRoundtripper{name, base}
@@ -27,6 +37,12 @@ type reqHeaderContext struct {
 type respHeaderAndStatusContext struct {
 	header http.Header
 	status int
+}
+
+// LoggerToContext create a new context containing the logger
+// Deprecated: Use ServerParams.WithPkgLogger instead
+func LoggerToContext(ctx context.Context, logger *logrus.Logger, entry *logrus.Entry) context.Context {
+	return context.WithValue(ctx, coreRequestContextKey{}, &coreRequestContext{logger, entry})
 }
 
 // RequestHeaderToContext create a new context containing the request header
@@ -96,16 +112,6 @@ func CoreRequestContextMiddleware() func(next http.Handler) http.Handler {
 }
 
 type coreRequestContextKey struct{}
-
-// Deprecated: github.com/anz-bank/pkg/log is replacing the logrus
-func GetLogEntryFromContext(ctx context.Context) *logrus.Entry {
-	return getCoreContext(ctx).entry
-}
-
-// Deprecated: github.com/anz-bank/pkg/log is replacing the logrus
-func GetLoggerFromContext(ctx context.Context) *logrus.Logger {
-	return getCoreContext(ctx).logger
-}
 
 func getCoreContext(ctx context.Context) *coreRequestContext {
 	return ctx.Value(coreRequestContextKey{}).(*coreRequestContext)
